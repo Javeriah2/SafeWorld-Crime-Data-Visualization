@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SafeWorld — Tests</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #111; color: #eee; }
+    h2 { margin-bottom: 16px; }
+    .pass { color: #2ecc71; }
+    .fail { color: #e74c3c; }
+    .section { margin-top: 16px; font-weight: bold; color: #aaa; }
+    .summary { margin-top: 20px; font-size: 1.2em; font-weight: bold; }
+  </style>
+</head>
+<body>
+<h2>SafeWorld Test Suite</h2>
+<pre id="output"></pre>
+<script type="module">
+  import { rankBoroughs, scoreToColour } from './js/scoring.js';
+  import { getState, setState, subscribe } from './js/state.js';
+
+  const out = document.getElementById('output');
+  let passed = 0, failed = 0;
+
+  function section(label) {
+    const el = document.createElement('span');
+    el.className = 'section';
+    el.textContent = `\n── ${label} ──\n`;
+    out.appendChild(el);
+  }
+
+  function assert(label, condition) {
+    const el = document.createElement('span');
+    el.className = condition ? 'pass' : 'fail';
+    el.textContent = `${condition ? '✓' : '✗'} ${label}\n`;
+    out.appendChild(el);
+    condition ? passed++ : failed++;
+  }
+
+  // ── rankBoroughs ──────────────────────────────────────────────────────────
+  section('rankBoroughs');
+
+  const three = [
+    { name: 'Hackney',     crimeCount: 300 },
+    { name: 'Richmond',    crimeCount: 100 },
+    { name: 'Westminster', crimeCount: 500 },
+  ];
+  const r3 = rankBoroughs(three);
+
+  assert('returns same length array', r3.length === 3);
+  assert('Richmond (fewest crimes) gets rank 1', r3.find(b => b.name === 'Richmond').rank === 1);
+  assert('Westminster (most crimes) gets rank 3', r3.find(b => b.name === 'Westminster').rank === 3);
+  assert('Westminster gets score 10', r3.find(b => b.name === 'Westminster').score === 10);
+  assert('each result has rank, score, name, crimeCount',
+    r3.every(b => 'rank' in b && 'score' in b && 'name' in b && 'crimeCount' in b));
+  assert('does not mutate input (no rank on original)', three[0].rank === undefined);
+
+  // With 33 boroughs the algorithm must produce min=1 and max=10
+  const thirtyThree = Array.from({ length: 33 }, (_, i) => ({ name: `B${i}`, crimeCount: i * 10 }));
+  const r33 = rankBoroughs(thirtyThree);
+  assert('33 boroughs — min score is 1', Math.min(...r33.map(b => b.score)) === 1);
+  assert('33 boroughs — max score is 10', Math.max(...r33.map(b => b.score)) === 10);
+
+  // Equal crime counts must not produce NaN or out-of-range scores
+  const equal = [
+    { name: 'A', crimeCount: 100 },
+    { name: 'B', crimeCount: 100 },
+    { name: 'C', crimeCount: 100 },
+  ];
+  const rEq = rankBoroughs(equal);
+  assert('equal crime counts — no NaN scores', rEq.every(b => !isNaN(b.score)));
+  assert('equal crime counts — scores in range 1–10', rEq.every(b => b.score >= 1 && b.score <= 10));
+
+  // ── scoreToColour ─────────────────────────────────────────────────────────
+  section('scoreToColour');
+
+  assert('score 1 → green #2ecc71',   scoreToColour(1)         === '#2ecc71');
+  assert('score 5 → amber #f1c40f',   scoreToColour(5)         === '#f1c40f');
+  assert('score 10 → dark red #c0392b', scoreToColour(10)      === '#c0392b');
+  assert('score 0 → grey #cccccc',    scoreToColour(0)         === '#cccccc');
+  assert('undefined → grey #cccccc',  scoreToColour(undefined) === '#cccccc');
+
+  // ── state ─────────────────────────────────────────────────────────────────
+  section('state');
+
+  const init = getState();
+  assert('initial category is all-crime',      init.category === 'all-crime');
+  assert('initial boroughData is empty array', Array.isArray(init.boroughData) && init.boroughData.length === 0);
+  assert('initial selectedBorough is null',    init.selectedBorough === null);
+
+  let fired = null;
+  subscribe('category', val => { fired = val; });
+  setState({ category: 'drugs' });
+  assert('setState triggers subscriber with new value', fired === 'drugs');
+  assert('getState reflects update',            getState().category === 'drugs');
+
+  // Reset so other tests aren't affected
+  setState({ category: 'all-crime' });
+
+  // ── Summary ───────────────────────────────────────────────────────────────
+  const summary = document.createElement('p');
+  summary.className = 'summary';
+  summary.style.color = failed === 0 ? '#2ecc71' : '#e74c3c';
+  summary.textContent = `\n${passed} passed, ${failed} failed`;
+  document.body.appendChild(summary);
+</script>
+</body>
+</html>
