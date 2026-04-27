@@ -1,0 +1,253 @@
+/* styles/components.css */
+
+/* ── Sidebar header ──────────────────────────────────────────────────────── */
+#sidebar-header h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+
+#tagline {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ── Form controls ───────────────────────────────────────────────────────── */
+#search-section label,
+#filter-section label {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+#location-search,
+#category-filter,
+#month-filter {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  padding: 8px 10px;
+  font-size: 0.875rem;
+  outline: none;
+  appearance: none;
+}
+
+#location-search:focus,
+#category-filter:focus,
+#month-filter:focus {
+  border-color: var(--accent);
+}
+
+#filter-section { display: flex; flex-direction: column; gap: 8px; }
+
+.error-msg {
+  color: #e74c3c;
+  font-size: 0.78rem;
+  margin-top: 4px;
+}
+
+/* ── Legend ──────────────────────────────────────────────────────────────── */
+#legend h3 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.legend-scale {
+  display: flex;
+  gap: 3px;
+}
+
+.legend-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+}
+
+.legend-swatch {
+  width: 100%;
+  height: 14px;
+  border-radius: 2px;
+  display: block;
+}
+
+.legend-score {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+}
+
+.legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-top: 5px;
+}
+
+/* ── Rankings ────────────────────────────────────────────────────────────── */
+.rankings-group { margin-bottom: 12px; }
+
+.rankings-group h3 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.rank-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.rank-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.rank-name { flex: 1; font-size: 0.825rem; }
+
+.rank-score {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* ── Export button ───────────────────────────────────────────────────────── */
+#export-btn {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  padding: 9px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: border-color 0.15s, background 0.15s;
+  margin-top: auto;
+}
+
+#export-btn:hover {
+  border-color: var(--accent);
+  background: #1a4080;
+}
+
+/* ── Detail panel ────────────────────────────────────────────────────────── */
+#close-detail {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+}
+
+#close-detail:hover { color: var(--text-primary); }
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding-right: 28px;
+}
+
+.detail-header h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.score-badge {
+  flex-shrink: 0;
+  border-radius: var(--radius);
+  padding: 4px 10px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.score-badge small {
+  font-size: 0.68rem;
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+.total-crimes {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin-bottom: 6px;
+}
+
+.trend {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.trend-up   { color: #e74c3c; }
+.trend-down { color: #2ecc71; }
+
+/* ── Crime breakdown bar chart ───────────────────────────────────────────── */
+.breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 6px;
+}
+
+.breakdown-row {
+  display: grid;
+  grid-template-columns: 130px 1fr 34px;
+  align-items: center;
+  gap: 8px;
+}
+
+.breakdown-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar-track {
+  background: var(--bg-input);
+  border-radius: 3px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+  min-width: 2px;
+}
+
+.breakdown-count {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-align: right;
+}
