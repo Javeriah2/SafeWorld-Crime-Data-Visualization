@@ -5,7 +5,7 @@ const POSTCODES_API = 'https://api.postcodes.io';
 
 // Reduces polygon vertex count so the query URL stays under browser limits.
 // We take every Nth point, targeting ~25 points per borough polygon.
-function simplifyPolygon(coords, targetPoints = 25) {
+function simplifyPolygon(coords, targetPoints = 16) {
   if (coords.length <= targetPoints) return coords;
   const step = Math.floor(coords.length / targetPoints);
   return coords.filter((_, i) => i % step === 0).slice(0, targetPoints);
@@ -57,11 +57,14 @@ async function fetchBoroughCrimes(feature, category, month) {
 
 // Runs an array of async tasks in sequential batches of `batchSize`.
 // Batching prevents the police API from rate-limiting 33 simultaneous requests.
+const wait = ms => new Promise(res => setTimeout(res, ms));
+
 async function batchSettled(tasks, batchSize = 5) {
   const results = [];
   for (let i = 0; i < tasks.length; i += batchSize) {
     const batch = await Promise.allSettled(tasks.slice(i, i + batchSize).map(fn => fn()));
     results.push(...batch);
+    if (i + batchSize < tasks.length) await wait(300);
   }
   return results;
 }
