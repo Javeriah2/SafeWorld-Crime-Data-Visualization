@@ -183,7 +183,8 @@
   --dp-ink-2:  #3A3A3A;
   --dp-ink-3:  #6B6B6B;
   --dp-ink-4:  #999999;
-  --dp-red:    #C0392B;
+  --dp-green:  #1A3C2A;
+  --dp-danger: #C0392B;
   --dp-rule:   #D8D5CE;
   --dp-paper:  #EDEBE5;
 }
@@ -218,7 +219,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: var(--dp-red);
+  color: var(--dp-green);
   margin-bottom: 6px;
 }
 
@@ -304,7 +305,7 @@
   letter-spacing: 0.08em;
 }
 
-.trend-up   { color: var(--dp-red); }
+.trend-up   { color: var(--dp-danger); }
 .trend-down { color: #27ae60; }
 
 /* ── Crime breakdown ─────────────────────────────────────────────────────── */
