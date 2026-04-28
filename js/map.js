@@ -6,8 +6,22 @@ let _map = null;
 let _infoWindow = null;
 let _boroughData = [];
 
-// Dynamically creates a <script> tag pointing at the Maps SDK.
-// Resolves once window.google.maps is available.
+// The style function is called by Google Maps for every feature render.
+// By using a function instead of a plain object, the colours persist through
+// hover/click interactions — revertStyle() removes the hover override and
+// falls back to this function, not to a hardcoded grey object.
+function styleFeature(feature) {
+  const name    = feature.getProperty('name');
+  const borough = _boroughData.find(b => b.name === name);
+  return {
+    fillColor:   borough && !borough.failed ? scoreToColour(borough.score) : '#cccccc',
+    fillOpacity: 0.65,
+    strokeColor: '#ffffff',
+    strokeWeight: 1,
+    cursor: 'pointer',
+  };
+}
+
 function loadMapsScript() {
   return new Promise((resolve, reject) => {
     if (window.google?.maps) { resolve(); return; }
@@ -35,22 +49,17 @@ export async function initMap(containerId) {
   _infoWindow = new google.maps.InfoWindow();
 }
 
-// Loads GeoJSON polygons onto the map and wires up hover + click events.
-// onBoroughClick(boroughName) is called when the user clicks a polygon.
 export function loadBoroughLayer(geojson, onBoroughClick) {
   _map.data.addGeoJson(geojson);
-  _map.data.setStyle({
-    fillColor: '#cccccc',
-    fillOpacity: 0.65,
-    strokeColor: '#ffffff',
-    strokeWeight: 1,
-    cursor: 'pointer',
-  });
+
+  // Use a style function so hover/click revertStyle() always falls back to
+  // the scored colour, not a static grey object.
+  _map.data.setStyle(styleFeature);
 
   _map.data.addListener('mouseover', e => {
-    const name = e.feature.getProperty('name');
+    const name    = e.feature.getProperty('name');
     const borough = _boroughData.find(b => b.name === name);
-    const score = borough?.score ?? '?';
+    const score   = borough?.score ?? '?';
     _infoWindow.setContent(
       `<div style="font-family:sans-serif;padding:4px 8px;font-size:13px">
          <strong>${name}</strong><br>Score: ${score}/10
@@ -58,12 +67,14 @@ export function loadBoroughLayer(geojson, onBoroughClick) {
     );
     _infoWindow.setPosition(e.latLng);
     _infoWindow.open(_map);
+    // Only override opacity — colour stays from styleFeature
     _map.data.overrideStyle(e.feature, { fillOpacity: 0.85, strokeWeight: 2 });
   });
 
-  _map.data.addListener('mouseout', () => {
+  _map.data.addListener('mouseout', e => {
     _infoWindow.close();
-    _map.data.revertStyle();
+    // Revert only the hovered feature — styleFeature re-applies its colour
+    _map.data.revertStyle(e.feature);
   });
 
   _map.data.addListener('click', e => {
@@ -71,20 +82,13 @@ export function loadBoroughLayer(geojson, onBoroughClick) {
   });
 }
 
-// Colours every polygon based on its score.
-// Also stores boroughData so the hover tooltip can show the score.
+// Updates the stored borough data and re-triggers the style function
+// across all features so the map re-colours itself.
 export function colourBoroughs(boroughData) {
   _boroughData = boroughData;
-  _map.data.forEach(feature => {
-    const name = feature.getProperty('name');
-    const borough = boroughData.find(b => b.name === name);
-    const colour = borough?.failed ? '#cccccc' : scoreToColour(borough?.score ?? 5);
-    _map.data.overrideStyle(feature, { fillColor: colour, fillOpacity: 0.65 });
-  });
+  _map.data.setStyle(styleFeature);
 }
 
-// Pans and zooms the map to fit the named borough's polygon bounds.
-// Returns true if found, false if the borough name wasn't in the layer.
 export function panToBorough(boroughName) {
   let found = false;
   _map.data.forEach(feature => {

@@ -55,13 +55,23 @@ async function fetchBoroughCrimes(feature, category, month) {
   return { name, crimes };
 }
 
-// Fetches crime totals for all 33 boroughs in parallel.
+// Runs an array of async tasks in sequential batches of `batchSize`.
+// Batching prevents the police API from rate-limiting 33 simultaneous requests.
+async function batchSettled(tasks, batchSize = 5) {
+  const results = [];
+  for (let i = 0; i < tasks.length; i += batchSize) {
+    const batch = await Promise.allSettled(tasks.slice(i, i + batchSize).map(fn => fn()));
+    results.push(...batch);
+  }
+  return results;
+}
+
+// Fetches crime totals for all 33 boroughs in batches of 5.
 // Uses Promise.allSettled so a single failure does not cancel the batch.
 // Returns { boroughData: [...], hasErrors: boolean }
 export async function fetchAllBoroughs(geojson, category, month) {
-  const results = await Promise.allSettled(
-    geojson.features.map(f => fetchBoroughCrimes(f, category, month))
-  );
+  const tasks = geojson.features.map(f => () => fetchBoroughCrimes(f, category, month));
+  const results = await batchSettled(tasks, 5);
 
   let hasErrors = false;
   const boroughData = results.map((result, i) => {
