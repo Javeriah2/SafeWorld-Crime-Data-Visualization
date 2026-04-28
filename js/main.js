@@ -100,18 +100,20 @@ function readHash() {
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 
 async function bootstrap() {
-  // 1. Load static borough boundary data
+  console.log('[SafeWorld] Step 1: loading GeoJSON');
   const res = await fetch('./data/london-boroughs.geojson');
   geojson   = await res.json();
+  console.log(`[SafeWorld] GeoJSON loaded — ${geojson.features.length} boroughs`);
 
-  // 2. Restore filter state from URL hash (shared links, browser back)
+  console.log('[SafeWorld] Step 2: reading URL hash');
   readHash();
 
-  // 3. Initialise Google Maps and add borough polygons
+  console.log('[SafeWorld] Step 3: initialising Google Maps');
   await initMap('map');
   loadBoroughLayer(geojson, openBorough);
+  console.log('[SafeWorld] Map ready');
 
-  // 4. Build sidebar UI
+  console.log('[SafeWorld] Step 4: building sidebar UI');
   renderLegend();
   initFilters(
     category => { setState({ category }); updateHash(); loadData(); },
@@ -119,11 +121,9 @@ async function bootstrap() {
   );
   searchControls = initSearch(handleSearch);
 
-  // Sync dropdowns to hash-restored state
   const { category, month } = getState();
   setFilterValues(category, month);
 
-  // 5. Wire up close button and CSV export
   document.getElementById('close-detail').addEventListener('click', () => {
     hideDetailPanel();
     setState({ selectedBorough: null });
@@ -135,10 +135,10 @@ async function bootstrap() {
     exportCSV(boroughData, m);
   });
 
-  // 6. Fetch and display crime data for initial state
+  console.log('[SafeWorld] Step 5: fetching crime data');
   await loadData();
+  console.log('[SafeWorld] Done');
 
-  // 7. If a borough was in the hash, open its detail panel now that data is loaded
   const { selectedBorough } = getState();
   if (selectedBorough) {
     panToBorough(selectedBorough);
