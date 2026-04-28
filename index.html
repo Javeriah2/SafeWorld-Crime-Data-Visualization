@@ -3,59 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SafeWorld — London Crime Map</title>
-  <link rel="stylesheet" href="styles/main.css" />
-  <link rel="stylesheet" href="styles/components.css" />
+  <title>SafeWorld — London Crime Intelligence</title>
+  <meta name="description" content="An open-source investigation into crime patterns across all 33 London boroughs. Scored, ranked, and visualised in real time." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
 </head>
 <body>
-  <div id="app">
-    <aside id="sidebar">
-      <div id="sidebar-header">
-        <h1>SafeWorld</h1>
-        <p id="tagline">London Borough Crime Map</p>
-      </div>
-
-      <div id="search-section">
-        <label for="location-search">Search borough or postcode</label>
-        <input
-          id="location-search"
-          type="text"
-          placeholder="e.g. Hackney or E8 1DY"
-          autocomplete="off"
-          aria-label="Search by borough name or postcode"
-        />
-        <p id="search-error" class="error-msg hidden" role="alert"></p>
-      </div>
-
-      <div id="filter-section">
-        <label for="category-filter">Crime Category</label>
-        <select id="category-filter" aria-label="Filter by crime category"></select>
-        <label for="month-filter">Month</label>
-        <select id="month-filter" aria-label="Select month"></select>
-      </div>
-
-      <div id="legend" aria-label="Crime score colour legend"></div>
-
-      <div id="rankings" aria-label="Borough rankings"></div>
-
-      <button id="export-btn" type="button">Export CSV</button>
-    </aside>
-
-    <main id="map-container">
-      <div id="map" aria-label="London borough crime map"></div>
-      <div id="loading-overlay" class="hidden" aria-live="polite">
-        <div class="spinner"></div>
-        <p>Loading crime data…</p>
-      </div>
-      <div id="error-banner" class="hidden" role="alert"></div>
-    </main>
-
-    <div id="detail-panel" aria-label="Borough crime detail">
-      <button id="close-detail" type="button" aria-label="Close detail panel">×</button>
-      <div id="detail-content"></div>
-    </div>
-  </div>
-
-  <script type="module" src="js/main.js"></script>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>

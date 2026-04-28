@@ -133,15 +133,6 @@ export function renderDetailPanel(detail, score) {
   const panel   = document.getElementById('detail-panel');
   const content = document.getElementById('detail-content');
 
-  let trendHtml = '';
-  if (detail.previousCount !== null && detail.previousCount > 0) {
-    const diff  = detail.crimeCount - detail.previousCount;
-    const pct   = Math.abs((diff / detail.previousCount) * 100).toFixed(1);
-    const cls   = diff > 0 ? 'trend-up' : 'trend-down';
-    const arrow = diff > 0 ? '▲' : '▼';
-    trendHtml   = `<p class="trend ${cls}">${arrow} ${pct}% vs last month</p>`;
-  }
-
   const maxCount    = Math.max(...Object.values(detail.breakdown), 1);
   const breakdownHtml = Object.entries(detail.breakdown)
     .sort(([, a], [, b]) => b - a)
@@ -157,12 +148,14 @@ export function renderDetailPanel(detail, score) {
 
   content.innerHTML = `
     <div class="detail-meta">
+      <p class="detail-eyebrow">London Borough</p>
       <div class="detail-header">
         <h2>${detail.name}</h2>
         <div class="score-badge" style="background:${scoreToColour(score)}">
           ${score}<small>/10</small>
         </div>
       </div>
+      <hr class="detail-divider" />
       <div class="detail-stats">
         <div class="stat">
           <span class="stat-value">${detail.crimeCount.toLocaleString()}</span>
