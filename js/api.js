@@ -39,7 +39,10 @@ async function fetchBoroughCrimes(feature, category, month) {
   const url = `${POLICE_API}/crimes-street/${category}?poly=${poly}&date=${month}`;
 
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status} for ${name}`);
+  if (!res.ok) {
+    console.warn(`[SafeWorld] API ${res.status} for ${name} — ${url}`);
+    throw new Error(`HTTP ${res.status} for ${name}`);
+  }
 
   const crimes = await res.json();
 

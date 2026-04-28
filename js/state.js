@@ -1,7 +1,10 @@
 // js/state.js
 
+// The police API publishes data ~2 months behind the current date.
+// Defaulting to 2 months ago ensures we always open on a month with data.
 function currentMonth() {
   const d = new Date();
+  d.setMonth(d.getMonth() - 2);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
