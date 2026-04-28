@@ -36,6 +36,30 @@ export function initFilters(onCategoryChange, onMonthChange) {
   monthSelect.addEventListener('change', () => onMonthChange(monthSelect.value));
 }
 
+// Wrap sidebar contents in proper section divs for styling
+export function wrapSidebarSections() {
+  const sections = [
+    { id: 'search-section',  label: 'Location Search' },
+    { id: 'filter-section',  label: 'Filters' },
+    { id: 'legend',          label: 'Crime Score' },
+    { id: 'rankings',        label: 'Rankings' },
+  ];
+  sections.forEach(({ id, label }) => {
+    const el = document.getElementById(id);
+    if (!el || el.closest('.sidebar-section')) return;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'sidebar-section';
+    if (id !== 'legend') {
+      const lbl = document.createElement('p');
+      lbl.className = 'section-label';
+      lbl.textContent = label;
+      wrapper.appendChild(lbl);
+    }
+    el.parentNode.insertBefore(wrapper, el);
+    wrapper.appendChild(el);
+  });
+}
+
 // Syncs dropdown values to match restored URL hash state.
 export function setFilterValues(category, month) {
   document.getElementById('category-filter').value = category;
@@ -64,19 +88,16 @@ export function initSearch(onSearch) {
 
 export function renderLegend() {
   const el = document.getElementById('legend');
-  const items = Array.from({ length: 10 }, (_, i) => {
-    const s = i + 1;
-    return `<div class="legend-item">
-      <span class="legend-swatch" style="background:${scoreToColour(s)}"></span>
-      <span class="legend-score">${s}</span>
-    </div>`;
-  }).join('');
+  const ticks = [1, 3, 5, 7, 10].map(n =>
+    `<span class="legend-tick">${n}</span>`
+  ).join('');
 
   el.innerHTML = `
-    <h3>Crime Score</h3>
-    <div class="legend-scale">${items}</div>
+    <p class="section-label">Crime Score</p>
+    <div class="legend-gradient"></div>
+    <div class="legend-ticks">${ticks}</div>
     <div class="legend-labels">
-      <span>Safest</span><span>Most Dangerous</span>
+      <span>Safest</span><span>Most dangerous</span>
     </div>
   `;
 }
@@ -91,18 +112,18 @@ export function renderRankings(boroughData) {
 
   const rowHtml = b => `
     <div class="rank-item">
-      <span class="rank-swatch" style="background:${scoreToColour(b.score)}"></span>
+      <span class="rank-dot" style="background:${scoreToColour(b.score)}"></span>
       <span class="rank-name">${b.name}</span>
       <span class="rank-score">${b.score}/10</span>
     </div>`;
 
   el.innerHTML = `
     <div class="rankings-group">
-      <h3>Most Dangerous</h3>
+      <p class="rankings-group-label">Most Dangerous</p>
       ${top5.map(rowHtml).join('')}
     </div>
     <div class="rankings-group">
-      <h3>Safest</h3>
+      <p class="rankings-group-label">Safest</p>
       ${bottom5.map(rowHtml).join('')}
     </div>
   `;
@@ -135,12 +156,29 @@ export function renderDetailPanel(detail, score) {
     .join('');
 
   content.innerHTML = `
-    <div class="detail-header">
-      <h2>${detail.name}</h2>
-      <span class="score-badge" style="background:${scoreToColour(score)}">${score}<small>/10</small></span>
+    <div class="detail-meta">
+      <div class="detail-header">
+        <h2>${detail.name}</h2>
+        <div class="score-badge" style="background:${scoreToColour(score)}">
+          ${score}<small>/10</small>
+        </div>
+      </div>
+      <div class="detail-stats">
+        <div class="stat">
+          <span class="stat-value">${detail.crimeCount.toLocaleString()}</span>
+          <span class="stat-label">Crimes recorded</span>
+        </div>
+        ${detail.previousCount !== null ? `
+        <div class="stat">
+          <span class="stat-value ${detail.crimeCount > detail.previousCount ? 'trend-up' : 'trend-down'}">
+            ${detail.crimeCount > detail.previousCount ? '▲' : '▼'}
+            ${Math.abs(((detail.crimeCount - detail.previousCount) / detail.previousCount) * 100).toFixed(1)}%
+          </span>
+          <span class="stat-label">vs last month</span>
+        </div>` : ''}
+      </div>
     </div>
-    <p class="total-crimes">${detail.crimeCount.toLocaleString()} crimes recorded</p>
-    ${trendHtml}
+    <p class="breakdown-title">Crime Breakdown</p>
     <div class="breakdown">${breakdownHtml}</div>
   `;
 

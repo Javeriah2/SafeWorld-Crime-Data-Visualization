@@ -5,7 +5,7 @@ import { rankBoroughs } from './scoring.js';
 import { initMap, loadBoroughLayer, colourBoroughs, panToBorough } from './map.js';
 import {
   initFilters, setFilterValues, initSearch,
-  renderLegend, renderRankings,
+  renderLegend, renderRankings, wrapSidebarSections,
   renderDetailPanel, hideDetailPanel,
   setLoading, showErrorBanner, exportCSV,
 } from './ui.js';
@@ -115,6 +115,7 @@ async function bootstrap() {
 
   console.log('[SafeWorld] Step 4: building sidebar UI');
   renderLegend();
+  wrapSidebarSections();
   initFilters(
     category => { setState({ category }); updateHash(); loadData(); },
     month    => { setState({ month });    updateHash(); loadData(); }
