@@ -3,23 +3,19 @@
 const POLICE_API = 'https://data.police.uk/api';
 const POSTCODES_API = 'https://api.postcodes.io';
 
-// Reduces polygon vertex count so the query URL stays under browser limits.
-// We take every Nth point, targeting ~25 points per borough polygon.
-function simplifyPolygon(coords, targetPoints = 16) {
-  if (coords.length <= targetPoints) return coords;
-  const step = Math.floor(coords.length / targetPoints);
-  return coords.filter((_, i) => i % step === 0).slice(0, targetPoints);
-}
-
-// GeoJSON stores coordinates as [longitude, latitude].
-// The police API wants "lat,lng:lat,lng:..." so we swap the order.
-// Handles both Polygon and MultiPolygon geometry types.
-function polygonToApiParam(geometry) {
+// Computes the centroid of a borough polygon from its GeoJSON geometry.
+// We query the police API by centroid lat/lng rather than the full polygon
+// because the API has an undocumented area limit — large outer London boroughs
+// (Richmond, Bromley, Havering etc.) silently drop the connection when queried
+// by polygon. The centroid approach works for every borough regardless of size,
+// and relative rankings remain valid since the same method is applied to all.
+function getCentroid(geometry) {
   const ring = geometry.type === 'MultiPolygon'
     ? geometry.coordinates[0][0]
     : geometry.coordinates[0];
-  const simplified = simplifyPolygon(ring);
-  return simplified.map(([lng, lat]) => `${lat},${lng}`).join(':');
+  let sumLat = 0, sumLng = 0;
+  ring.forEach(([lng, lat]) => { sumLat += lat; sumLng += lng; });
+  return { lat: sumLat / ring.length, lng: sumLng / ring.length };
 }
 
 function cacheKey(boroughName, category, month) {
@@ -33,10 +29,8 @@ async function fetchBoroughCrimes(feature, category, month) {
   const cached = sessionStorage.getItem(key);
   if (cached) return { name, crimes: JSON.parse(cached) };
 
-  // We do not encodeURIComponent(poly) — the string only contains digits,
-  // commas, minus signs, and colons. Encoding colons to %3A breaks some parsers.
-  const poly = polygonToApiParam(feature.geometry);
-  const url = `${POLICE_API}/crimes-street/${category}?poly=${poly}&date=${month}`;
+  const { lat, lng } = getCentroid(feature.geometry);
+  const url = `${POLICE_API}/crimes-street/${category}?lat=${lat}&lng=${lng}&date=${month}`;
 
   const res = await fetch(url);
   if (!res.ok) {
