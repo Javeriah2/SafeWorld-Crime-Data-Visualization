@@ -1,5 +1,6 @@
 config.js
 node_modules/
+dist/
 dist-landing/
 .DS_Store
 Thumbs.db

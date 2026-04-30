@@ -6,6 +6,6 @@ export default defineConfig({
   // Landing page lives at the project root as index.html
   // Map lives at map.html — Vite ignores it (not in the module graph)
   build: {
-    outDir: 'dist-landing',
+    outDir: 'dist',
   },
 });
